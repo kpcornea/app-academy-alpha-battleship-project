@@ -1,5 +1,3 @@
-require "byebug"
-
 class Board
   attr_reader :size
 
@@ -15,11 +13,6 @@ class Board
 
   def []=(idx_pair, value)
     @grid[idx_pair[0]][idx_pair[1]] = value
-    # calling itself here so that's why have to define explicitly here, but not in additional methods?
-    # self[idx_pair] = value
-    # self.[](idx_pair) = value
-    # pos = self.[](idx_pair)
-    # pos = value
   end
 
   def num_ships
@@ -32,14 +25,10 @@ class Board
 
   def attack(idx_pair)
     if self[idx_pair] == :S
-      # @grid[idx_pair[0]][idx_pair[1]] = :H
-      # self.[]=(idx_pair, :H)
       self[idx_pair] = :H
       puts 'you sunk my battleship!'
       return true
     end
-      # @grid[idx_pair[0]][idx_pair[1]] = :X
-      # self.[]=(idx_pair, :X)
       self[idx_pair] = :X
       false
   end
@@ -47,22 +36,45 @@ class Board
   def place_random_ships
     quarter = @size / 4
     i = 0
-    # byebug
     while self.num_ships < quarter
-      # byebug
       sub_arr = @grid[i]
       sub_arr[rand(0...@length)] = :S
-      # byebug
       i += 1
       i = 0 if i == @length
     end
-    # i didn't reset i lol
-    # @grid.each do |sub_arr|
-    #   sub_arr[1..n.sample] = :S
-    # end
+  end
+
+  def hidden_ships_grid
+    hidden_grid = Marshal.load(Marshal.dump(@grid))
+    hidden_grid.each do |sub_arr|
+      sub_arr.each_with_index do |pos, i|
+        sub_arr[i] = :N if pos == :S
+      end
+    end
+    hidden_grid
+  end
+
+  def self.print_grid(grid)
+    grid.each do |sub_arr|
+      puts sub_arr.join(" ")
+    end
+  end
+
+  def cheat
+    Board.print_grid(@grid)
+  end
+
+  def print
+    Board.print_grid(hidden_ships_grid)
   end
 
 end
 
-# b1 = Board.new(10)
+b1 = Board.new(2)
 # b1.place_random_ships
+p b1
+b1.place_random_ships
+p b1
+h = b1.hidden_ships_grid
+p h
+p b1
