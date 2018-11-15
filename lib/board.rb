@@ -1,10 +1,10 @@
 class Board
   attr_reader :size
 
-  def initialize(n)
-    @grid = Array.new(n){ Array.new(n, :N) }
-    @size = n * n
-    @length = n
+  def initialize(length)
+    @grid = Array.new(length){ Array.new(length, :N) }
+    @size = length * length
+    @length = length
   end
 
   def [](idx_pair)
@@ -45,12 +45,22 @@ class Board
   end
 
   def hidden_ships_grid
-    hidden_grid = Marshal.load(Marshal.dump(@grid))
-    hidden_grid.each do |sub_arr|
-      sub_arr.each_with_index do |pos, i|
-        sub_arr[i] = :N if pos == :S
+    hidden_grid = []
+
+    @grid.each do |sub_arr|
+      new_sub_arr = []
+
+      sub_arr.each do |pos|
+        if pos == :X || pos == :N
+          new_sub_arr << pos
+        else
+          new_sub_arr << :N
+        end
       end
+
+      hidden_grid << new_sub_arr
     end
+
     hidden_grid
   end
 
@@ -67,14 +77,4 @@ class Board
   def print
     Board.print_grid(hidden_ships_grid)
   end
-
 end
-
-b1 = Board.new(2)
-# b1.place_random_ships
-p b1
-b1.place_random_ships
-p b1
-h = b1.hidden_ships_grid
-p h
-p b1
