@@ -2,66 +2,64 @@ class Board
   attr_reader :size
 
   def initialize(length)
-    @grid = Array.new(length){ Array.new(length, :N) }
+    @grid = Array.new(length) { Array.new(length, :N) }
     @size = length * length
     @length = length
   end
 
   def [](idx_pair)
-    @grid[idx_pair[0]][idx_pair[1]]
+    row, col = idx_pair
+    @grid[row][col]
   end
 
   def []=(idx_pair, value)
-    @grid[idx_pair[0]][idx_pair[1]] = value
+    row, col = idx_pair
+    @grid[row][col] = value
   end
 
   def num_ships
-    count = 0
-    @grid.each do |sub_arr|
-      count += sub_arr.count(:S)
-    end
-    count
+    @grid.flatten.count { |ele| ele == :S }
   end
 
   def attack(idx_pair)
     if self[idx_pair] == :S
       self[idx_pair] = :H
-      puts 'you sunk my battleship!'
+      puts "you sunk my battleship!"
+      return true
+    elsif self[idx_pair] == :H
+      puts "you already sunk that one!"
+      return true
+    elsif self[idx_pair] == :X
+      puts "you already missed there!"
+      return true
+    elsif self[idx_pair] == nil
+      puts "that's not even on the map..."
       return true
     end
       self[idx_pair] = :X
+      puts "you missed!"
       false
   end
 
   def place_random_ships
     quarter = @size / 4
-    i = 0
     while self.num_ships < quarter
-      sub_arr = @grid[i]
-      sub_arr[rand(0...@length)] = :S
-      i += 1
-      i = 0 if i == @length
+      rand_row = rand(0...@length)
+      rand_col = rand(0...@length)
+      self[[rand_row, rand_col]] = :S
     end
   end
 
   def hidden_ships_grid
-    hidden_grid = []
-
-    @grid.each do |sub_arr|
-      new_sub_arr = []
-
-      sub_arr.each do |pos|
-        if pos == :X || pos == :N
-          new_sub_arr << pos
+    @grid.map do |sub_arr|
+      sub_arr.map do |ele|
+        if ele == :S
+          :N
         else
-          new_sub_arr << :N
+          ele
         end
       end
-
-      hidden_grid << new_sub_arr
     end
-
-    hidden_grid
   end
 
   def self.print_grid(grid)
